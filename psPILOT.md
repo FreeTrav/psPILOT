@@ -70,25 +70,26 @@ End (return from) subroutine or (if outside of a subroutine) end the program. In
 
 `J:«label»`
 
-Jump to the line of the program indicated by `«label»`. 
+Jump to the line of the program indicated by `«label»`. psPILOT requires the `«label»` to begin with the `*` in the `J` statement (e.g., `J:*TARGET`); other PILOT implementations permit (or require) it to be omitted (e.g., `J:TARGET`). 
 
- J:*RESTART
+#### M: Match
 
-M
-Match the accept buffer against string variables or string literals. Example:
+`M:«match-value-list»`
 
- R:Search accept buffer for "TRUTH", the value of MEXICO and "YOUTH", in that order
- M:TRUTH,$MEXICO,YOUTH
+Match the accept buffer against string variables or string literals. Multiple values may be given separated by `,`, `!`, or `|`. 
 
-The first match string (if any) that is a substring of the accept buffer is assigned to the special variable $MATCH. The buffer characters left of the first match are assigned to $LEFT, and the characters on the right are assigned to $RIGHT.
+ The first match string (if any) that is a substring of the accept buffer is assigned to the special (system) variable `%MATCH`. The buffer characters left of the first match are assigned to `%LEFT`, and the characters on the right are assigned to `%RIGHT`.
 
 The match flag is set to 'yes' or 'no', depending on whether a match is made. Any statement that has a Y following the command letter is processed only if the match flag is set. Statements with N are processed only if the flag is not set.
 
-N
-Equivalent to TN: (type if last match unsuccessful)
-R
+#### R: Remark
+
 The operand of R: is a comment, and therefore has no effect.
-T
+
+#### T: Type
+
+T:«string-value»
+
 'Type' operand as output. Examples:
 
  R:Output a literal string
@@ -96,14 +97,18 @@ T
  R:Output a variable expression
  T:Thank you, $NAME.
 
+Y
+Equivalent to TY: (type if last match successful)
+
+N
+Equivalent to TN: (type if last match unsuccessful)
+
 U
 Use (call) a subroutine. A subroutine starts with a label and ends with E: Example:
 
  R:Call subroutine starting at label *INITIALIZE
  U:*INITIALIZE
 
-Y
-Equivalent to TY: (type if last match successful)
 Parentheses
 If there is parenthesized expression in a statement, it is a conditional expression, and the statement is processed only if the test has a value of 'true'. Example:
 
