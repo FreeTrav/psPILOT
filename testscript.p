@@ -1,31 +1,44 @@
+R: Tests various commands as they're added to psPILOT
+U: *TESTLINK
+E:
+
+*RPTCMDS
 T: This is a properly marked line.
  : This is a repeat-command line; it should print.
  : Another continuation line
- : The next line should link to a different source file
 T: A properly marked line again
-C:$foo = bar
+E:
+
+*JUMPAT
+T: Type a word:
 A: $BAR
 M: JUMP
+TY:Jumping to @P (next P line)
 JY:@P
 M: BAR
 TN: You didn't type BAR
+TN: Jumping to @A (back to the previous A line). Type a word:
 JN:@A
-C:$elephant = $foo$foo\bar
-T:$elephant
-C: #FOO = (5/2) + (5/2)
-C: $OOF = FOO
-T: This is the value of \#FOO: #FOO; \$OOF is $OOF
-T(#foo=5): The string matched
-A: $BAR
-M: YES
-JN: @M
-T: Typed yes
-M: No
-JN: *SKIP
-T: Typed No
-*SKIP
+T: You typed BAR, test ending.
 P:
-T: exit decision struct
+T: @J works.
 E:
 
+*COMPUTE
+R: Tests numerics
+C: #NUMBER = (22 / 7) * 100
+T: \#NUMBER should be 314. Actually is #NUMBER
+R: Test strings
+C: $STRING = TEXT
+T: \$STRING is $STRING. Test head-concatenation:
+C: $HEAD = $STRING\BOOK
+T: \$HEAD should be TEXTBOOK: $HEAD. Test tail concatenation:
+C: $TAIL = TELE$STRING
+T: \$TAIL should be TELETEXT: $TAIL. Test variable-variable concatenation:
+C: $VARVAR = $HEAD$TAIL
+T: \$VARVAR should be TEXTBOOKTELETEXT: $VARVAR
+E:
+
+*TESTLINK
+L:TESTLINK.P
 
