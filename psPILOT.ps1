@@ -170,7 +170,7 @@ while ($IP -lt $program.length)  {
                       break
                   } 
                 }
-                "G" { "PSPILOT does not support graphics"
+                "G" { "psPILOT does not support graphics"
                       $IP++
                       break
                 }

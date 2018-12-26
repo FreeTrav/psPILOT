@@ -1,14 +1,10 @@
- # psPILOT
+# psPILOT
 
-   ## Introduction
+## Introduction
 
 psPILOT is an implementation of the PILOT programming language (**P**rogrammed **I**nstruction, **L**earning, **O**r **T**eaching) written entirely in Microsoft's PowerShell scripting language. It implements most of the PILOT Core language as defined in the (now withdrawn) IEEE standard 1154 of 1991 (Corrected to November 1991). For historical information on and an overview of the language, the reader is referred to [Wikipedia's page on the PILOT language](https://en.wikipedia.org/wiki/PILOT).
 
 This implementation has been tested using PowerShell 5 on Windows 7 and PowerShell 6 on Linux Mint, but it should work without issue on any PowerShell 5 or later system, and quite likely on any PowerShell 3 or later system.
-
-## Overview of PILOT programs
-
-...
 
 ## psPILOT Syntax
 
@@ -23,6 +19,14 @@ In the syntax descriptions below, the following symbols are used:
 `«filename»`: Filenames are system-dependent as to syntax and allowable characters; psPILOT makes no effort to validate the existence of a file or the syntax of its name. Filenames may be stored in string variables, and the variable passed to PILOT statements that expect a `«filename»`.
 
 `«label»`: A label is an alphanumeric string prefixed by `*`. In psPILOT, the label must be the only thing on the program line; the Standard allows it to be followed by whitespace and any PILOT command.
+
+### Statement Structure
+
+A PILOT statement consists of one or more letters identifying the specific operation to be performed, followed optionally by `Y`, `N`, or a conditional expression in parentheses, followed by a colon `:`, followed by one or more operands which may or may not be optional, depending on the statement. In EBNF, 
+
+`«statement»::=«command-letters»["Y"|"N"|(«conditional-expression»)]:[«operands»]`
+
+The `«command-letters»` are described below.
 
 ### Core Statements
 
@@ -94,38 +98,54 @@ The operand of R: is a comment, and therefore has no effect.
 
 #### T: Type
 
-T:«string-value»
+`T:«string-value»`
 
-'Type' operand as output. Examples:
+'Type' operand as output to the default output device (usually the screen). Variables are expanded, but `«expression»`s that would be valid in a `C:` statement are not evaluated.
 
-Y
-Equivalent to TY: (type if last match successful)
+##### Y: Yes
 
-N
+`Y: «string-value»`
+
+Equivalent to TY: (type if last match successful). 
+
+##### N: No
+
+`N:«string-value»`
+
 Equivalent to TN: (type if last match unsuccessful)
 
-U
+#### U: Use
+
 Use (call) a subroutine. A subroutine starts with a label and ends with E:
 Example:
 
-Parentheses
-If there is parenthesized expression in a statement, it is a conditional expression, and the statement is processed only if the test has a value of 'true'. Example:
-R:Type message if x>y+z
-T(#X>#Y+#Z):Condition met...
+#### Conditional Expressions (Parentheses)
+
+If there is parenthesized expression in a statement, it is a conditional expression, and the statement is processed only if the test has a value of 'true'. In EBNF, the conditional expression is 
+
+`«conditional-expression»::=«value»«relational-operator»«value»`
+
+`«relational-operator»::="<"|"<="|"="|">="|">"|"<>"`
+
+If the `«value»`s are strings, comparison is done using case-insensitive lexical ordering, i.e., `"A"="a"` will be true.
+
+Example:
+`R:Type message if x>y+z`
+`T(#X>#Y+#Z):Condition met...`
 
 ### Extensions suggested in the Standard
 
 #### L: Link
 
-`L: «filespec»`
+`L: «filename»`
 
-`«filespec»` is a legal filename on the host system, which may include path information. psPILOT does not check the validity of the value, nor does it verify the existence of the file before attempting to load it.
+`«filename»` is a legal filename on the host system, which may include path information. psPILOT does not check the validity of the value, nor does it verify the existence of the file before attempting to load it.
 
 The `L` (`Link`) statement is mentioned in section 4.1 of the Standard. `«filespec»` is expected to be a program in the PILOT language, and replaces the previous program in memory. The Standard is silent on the matter of whether variables or status information (e.g., the `Accept` buffer or system variables) should be preserved or discarded upon `Link`; the documentation for Nevada PILOT implies that variables are preserved across a `Link` (which Nevada PILOT calls `LOAD`), but PSPILOT does _not_ preserve variables or other program status information.
 
 ### Extensions not suggested in the Standard
 
-...
+TBD
 
 ## Known Bugs and Other Infelicities
 
@@ -135,10 +155,10 @@ The `L` (`Link`) statement is mentioned in section 4.1 of the Standard. `«files
 
 ### A: Permanent Differences
 
-Numbers in brackets represent sections of the standard from which PSPILOT differs.
+Numbers in brackets represent sections of the standard from which psPILOT differs.
 
 1. Only the short-form commands (`T`, `A`, `M`, etc.) are accepted; the full keywords (`Type`, `Accept`, `Match`, etc.) cannot be used. [2.2, 2.3]
-2. The `G` (`Graphic`) Core statement simply prints a message `PSPILOT does not support graphics`, but does not throw an error. [2.2, 2.3]
+2. The `G` (`Graphic`) Core statement simply prints a message `psPILOT does not support graphics`, but does not throw an error. [2.2, 2.3]
 3. Variables must use the type-indicator as the lead character; strings must be `$name`, numbers must be `#name`. [3.1, 3.2]
 4. The system variables `%expression`, `%term`, `%factor`, `%nextstmt`, `%maxuses`, `%return*`, `%relation`, and `%text` are not supported. [2.3]
 5. The standard states that early (pre-Standard) implementations of the `C` (`Compute`) statement 'dropped' into the host language (most PILOT interpreters were not in machine-native code, but ran 'on top' of other languages like BASIC) to evaluate the expression, and implies that the conformant interpreter should parse the expression and evaluate it directly, using conventions similar to those of BASIC. psPILOT returns to the original design, and internally converts the BASIC-convention expressions into PowerShell conventions, and then asks PowerShell to evaluate them. This is the reason that the system variables `%expression`, `%term`, and `%factor`, mentioned in 4. above, are not available.
@@ -159,3 +179,4 @@ Numbers in brackets represent sections of the standard from which PSPILOT differ
 
 1. **RPILOT:** The `S` command (execute a system command) and the `X` command (Execute a string as a PILOT command) are not supported. Note that the Standard recommends that `S` be used for playing sound, and execution of system commands use the two-character command `XS`.
 2. **RPILOT** allows matching in the `M` statement of any of several words separating them with spaces (e.g., `M: YES YEP YEA`) . IEEE Standard 1154-1991 does not indicate that this is permissible, specifying only `,`, `!`, or `|` as separators (e.g., `M: YES, YEP, YEA`). psPILOT follows the standard, not RPILOT, in this.
+3. **Nevada PILOT** allowed spaces in multiple-alternative matches - that is, `M:THIS,THAT` was different from `M:THIS , THAT` - the latter matched the word THIS followed by a space, or the word THAT following a space. psPILOT does not support matching spaces.
