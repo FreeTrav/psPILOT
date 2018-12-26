@@ -1,8 +1,8 @@
-﻿param ( [string]$pilotscript )
+﻿param ( [Parameter(Mandatory=$true)][string]$sourcefile )
 
 # Global variables
 
-$sourcecode = Get-Content -Path $pilotscript
+$sourcecode = Get-Content -Path $sourcefile
 
 $program = @()
 
@@ -141,7 +141,6 @@ function loadsource {
 
 
 
-
 # Main code
 
 loadsource -sourcecode $sourcecode
@@ -225,7 +224,7 @@ while ($IP -lt $program.length)  {
                       }
                       $script:variables["%uselevel"]++
                       $dest = $labels[$line[1].Trim()]
-                      if ($dest = $null) { "U: Undefined Subroutine Label $($line[1].trim()) in line $IP" ; return }
+                      if ($dest -eq $null) { "U: Undefined Subroutine Label $($line[1].trim()) in line $IP" ; return }
                       $IP = $dest
                       break
                 }
