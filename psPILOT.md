@@ -78,9 +78,7 @@ End (return from) subroutine or (if outside of a subroutine) end the program. In
 
 `J:«label»`
 
-Jump to the line of the program indicated by `«label»`. If there is no line in the program matching the `«label»`, psPILOT will report that the label is undefined and exit the PILOT program. psPILOT requires the `«label»` to begin with the `*` in the `J` statement (e.g., `J:*TARGET`); other PILOT implementations permit (or require) it to be omitted (e.g., `J:TARGET`). 
-
-`J:*RESTART` will cause execution to continue from the line following the label `*restart`.
+Jump to the line of the program indicated by `«label»`. If there is no line in the program matching the `«label»`, psPILOT will report that the label is undefined and exit the PILOT program. Different implementations of PILOT variously require, permit, or prohibit the leading `*` in the `«label»` in a `J` statement; psPILOT permits it but does not require it (i.e., `J: *TARGET` and `J: TARGET` are equivalent). 
 
 #### M: Match
 
@@ -116,8 +114,7 @@ Equivalent to TN: (type if last match unsuccessful)
 
 #### U: Use
 
-Use (call) a subroutine. A subroutine starts with a label and ends with E:
-Example:
+Use (call) a subroutine. A subroutine starts with a label and ends with E:. psPILOT saves the line number of the call, and jumps to the designated label, continuing execution from that point. When the E: statement is reached, psPILOT returns to the program line following the saved line number, and resumes execution. Different implementations of PILOT variously require, permit, or prohibit the leading `*` in the `«label»` in a `U` statement; psPILOT permits it but does not require it (i.e., `U: *TARGET` and `U: TARGET` are equivalent). 
 
 #### Conditional Expressions (Parentheses)
 
@@ -142,6 +139,14 @@ Example:
 `«filename»` is a legal filename on the host system, which may include path information. psPILOT does not check the validity of the value, nor does it verify the existence of the file before attempting to load it.
 
 The `L` (`Link`) statement is mentioned in section 4.1 of the Standard. `«filespec»` is expected to be a program in the PILOT language, and replaces the previous program in memory. The Standard is silent on the matter of whether variables or status information (e.g., the `Accept` buffer or system variables) should be preserved or discarded upon `Link`; the documentation for Nevada PILOT implies that variables are preserved across a `Link` (which Nevada PILOT calls `LOAD`), but PSPILOT does _not_ preserve variables or other program status information.
+
+#### P: Problem (alternatively, Parameters)
+
+`P: «text»`
+
+`«text»` is treated as a comment.
+
+The Standard suggests that this label be used to define program sections ("problems") and to set parameters for the section. It also permits the use of `@P` as the target of a `J:`, meaning "jump to the next `P:` statement". At present, the only use of `P:` in a psPILOT program is to allow the use of `@P` in `J:` statements.
 
 ### Extensions not suggested in the Standard
 

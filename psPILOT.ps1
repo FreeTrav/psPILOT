@@ -188,9 +188,8 @@ while ($IP -lt $program.length)  {
                                     break
                               }
                           }
-                      } else { 
-
-                                                                                 #      To the specified label
+                      } else {                                                   #      To the specified label
+                          if (($line[1].trim())[0] -ne "*") { $line[1] = "*$($line[1].trim())" }  # if it doesn't start with a *, add one
                           $dest = $labels[$line[1].Trim()]
                           if ($dest -eq $null) { "J: Undefined Label $($line[1].trim()) in line $IP" ; return } 
                           $IP = $dest
@@ -223,6 +222,7 @@ while ($IP -lt $program.length)  {
                           $retloc[$script:variables["%uselevel"]] = $IP + 1
                       }
                       $script:variables["%uselevel"]++
+                      if (($line[1].trim())[0] -ne "*") { $line[1] = "*$($line[1].trim())" }  # if it doesn't start with a *, add one
                       $dest = $labels[$line[1].Trim()]
                       if ($dest -eq $null) { "U: Undefined Subroutine Label $($line[1].trim()) in line $IP" ; return }
                       $IP = $dest

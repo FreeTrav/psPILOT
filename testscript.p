@@ -1,5 +1,5 @@
 R: Tests various commands as they're added to psPILOT
-U: *TESTLINK
+U: *TESTLABEL
 E:
 
 *RPTCMDS
@@ -42,3 +42,12 @@ E:
 *TESTLINK
 L:TESTLINK.P
 E:
+
+*TESTLABEL
+T: Entered TESTLABEL
+J: *NOSTAR
+T: This line should not be printed
+*NOSTAR
+T: This line is printed.
+E:
+
