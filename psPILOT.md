@@ -92,7 +92,9 @@ The first match string (if any) that is a substring of the accept buffer is assi
 
 #### R: Remark
 
-The operand of R: is a comment, and therefore has no effect.
+`R: «text»`
+
+`«text»` is a comment, and therefore has no effect.
 
 #### T: Type
 
@@ -114,7 +116,7 @@ Equivalent to TN: (type if last match unsuccessful)
 
 #### U: Use
 
-Use (call) a subroutine. A subroutine starts with a label and ends with E:. psPILOT saves the line number of the call, and jumps to the designated label, continuing execution from that point. When the E: statement is reached, psPILOT returns to the program line following the saved line number, and resumes execution. Different implementations of PILOT variously require, permit, or prohibit the leading `*` in the `«label»` in a `U` statement; psPILOT permits it but does not require it (i.e., `U: *TARGET` and `U: TARGET` are equivalent). 
+Use (call) a subroutine. A subroutine starts with a label and ends with `E:`. psPILOT saves the line number following the call, and jumps to the designated label, continuing execution from that point. When the `E:` statement is reached, psPILOT returns to the the saved line number, and resumes execution. Different implementations of PILOT variously require, permit, or prohibit the leading `*` in the `«label»` in a `U` statement; psPILOT permits it but does not require it (i.e., `U: *TARGET` and `U: TARGET` are equivalent). 
 
 #### Conditional Expressions (Parentheses)
 
@@ -146,7 +148,7 @@ The `L` (`Link`) statement is mentioned in section 4.1 of the Standard. `«files
 
 `«text»` is treated as a comment.
 
-The Standard suggests that this label be used to define program sections ("problems") and to set parameters for the section. It also permits the use of `@P` as the target of a `J:`, meaning "jump to the next `P:` statement". At present, the only use of `P:` in a psPILOT program is to allow the use of `@P` in `J:` statements.
+The Standard suggests that this statement be used to define program sections ("problems") and to set parameters for the section. It also permits the use of `@P` as the target of a `J:`, meaning "jump to the next problem (`P:` statement)". At present, the only use of `P:` in a psPILOT program is to allow the use of `@P` in `J:` statements.
 
 ### Extensions not suggested in the Standard
 
@@ -170,18 +172,18 @@ Numbers in brackets represent sections of the standard from which psPILOT differ
 6. There is no defined limit on the number of levels of `U` statement nesting; this is the reason that the system variables `%maxuses` and `%return*`, mentioned in 4. above, are not supported.
 7. String literals in conditions must be quoted (e.g., `T($foo="bar")`, not `T($foo=bar)`). However, they should ***not*** be quoted in assignments (e.g., `C:$foo=bar`, not `C:$foo="bar"`). [2.2, 4.5]
 8. Labels are not limited to ten characters in length. [2.3]
-9. The `H` modifier to `T` and `A` is not supported. (This is due to limitations in PowerShell). [4.3]
+9. Labels as the operand of `J:` and `U:` statements do not require the initial `*`, but permit it. This is for compatibility with PILOT implementations that also do not require it, or which prohibit it. [2.3]
+10. The `H` modifier to `T` and `A` is not supported. (This is due to limitations in PowerShell). [4.3]
 
 ### B: To Be Changed
 
 1. Labels must be on lines by themselves (that is, you cannot do `*HERE T: We're here`). [2.3]
-2. The target of a `J` statement must include the leading `*`. That is, the standard describes a `J` statement as being written `J:LABEL`; psPILOT requires you to write `J:*LABEL`. This is consistent with Nevada PILOT; RPILOT follows the standard. This will be fixed to allow either style as equivalent. [2.3]
-3. The `F` (`File`) Core statement is not supported. Note that the standard does not specify how to select file operations, or their specific effects. [2.2, 2.3]
-4. The Extensions of sections 4.1 through 4.4 of the standard are not supported (some will be unsupported permanently). [4.1, 4.2, 4.3, 4.4]
-5. `T`, `N`, and `Y` statements that would wrap past the maximum width of the output device do not word-wrap; they 'letter wrap'. [4.6]
+2. The `F` (`File`) Core statement is not supported. Note that the standard does not specify how to select file operations, or their specific effects. [2.2, 2.3]
+3. Most Extensions of sections 4.1 through 4.4 of the standard are not supported (some will be unsupported permanently). [4.1, 4.2, 4.3, 4.4]
+4. `T`, `N`, and `Y` statements that would wrap past the maximum width of the output device do not word-wrap; they 'letter wrap'. [4.6]
 
 ### Differences from Other PILOT Implementations
 
 1. **RPILOT:** The `S` command (execute a system command) and the `X` command (Execute a string as a PILOT command) are not supported. Note that the Standard recommends that `S` be used for playing sound, and execution of system commands use the two-character command `XS`.
 2. **RPILOT** allows matching in the `M` statement of any of several words separating them with spaces (e.g., `M: YES YEP YEA`) . IEEE Standard 1154-1991 does not indicate that this is permissible, specifying only `,`, `!`, or `|` as separators (e.g., `M: YES, YEP, YEA`). psPILOT follows the standard, not RPILOT, in this.
-3. **Nevada PILOT** allowed spaces in multiple-alternative matches - that is, `M:THIS,THAT` was different from `M:THIS , THAT` - the latter matched the word THIS followed by a space, or the word THAT following a space. psPILOT does not support matching spaces.
+3. **Nevada PILOT** allowed leading or trailing spaces in multiple-alternative matches - that is, `M:THIS,THAT` was different from `M:THIS , THAT` - the latter matched the word THIS followed by a space, or the word THAT following a space. psPILOT does not support matching leading or trailing spaces.
