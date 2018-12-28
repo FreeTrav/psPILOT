@@ -46,7 +46,7 @@ Some implementations of PILOT permit multiple `«variable-name»`s to be supplie
 
 Compute and assign a value to a variable. 
 
-If `«variable-name»` indicates a numeric value (begins with `#`), `«expression»` may contain basic mathematical operations `+`, `-`, `*`, and `/`; the order of evaluation is multiplication and division before addition and subtraction, but may be changed through the use of parentheses `()`. Calculations will result in an integer value (though they will be carried out internally in floating point and rounded at the end - `(5/2) + (5/2) ` will evaluate to 5, not 4).
+If `«variable-name»` indicates a numeric value (begins with `#`), `«expression»` may contain basic mathematical operations `+`, `-`, `*`, `/`, and `%` (modulus, or remainder from division); the order of evaluation is multiplication and division (including modulus) before addition and subtraction, but may be changed through the use of parentheses `()`. Calculations will result in an integer value (though they will be carried out internally in floating point and rounded at the end - `(5/2) + (5/2) ` will evaluate to 5, not 4).
 
 If `«variable-name»` indicates a string value (begins with `$`), no computation other than variable expansion will occur; effectively, the only operation available is concatenation: 
 
@@ -130,6 +130,7 @@ If the `«value»`s are strings, comparison is done using case-insensitive lexic
 
 Example:
 `R:Type message if x>y+z`
+
 `T(#X>#Y+#Z):Condition met...`
 
 ### Extensions suggested in the Standard
@@ -150,9 +151,21 @@ The `L` (`Link`) statement is mentioned in section 4.1 of the Standard. `«files
 
 The Standard suggests that this statement be used to define program sections ("problems") and to set parameters for the section. It also permits the use of `@P` as the target of a `J:`, meaning "jump to the next problem (`P:` statement)". At present, the only use of `P:` in a psPILOT program is to allow the use of `@P` in `J:` statements.
 
+#### Intraline Comments
+
+Any program line may include a comment at the end of the statement; such comments start with `//` and run to the end of the line. If you need to use the string `//` as text rather than a comment indicator, prefix _both_ slashes with backslashes (`\/\/`).
+
+`T: This text will be printed //this text will not`
+
+`T: This text will be printed \/\/and so will this`
+
 ### Extensions not suggested in the Standard
 
-TBD
+#### Modulus Operator
+
+The Standard specifies only that `+`, `-`, `*`, and `/` be supported for integer math. The modulus operator, returning the _remainder_ from integer division (`/`), is also supported, using the operator character `%`.
+
+`C:#ONE=5%2  //#ONE contains the value 1`
 
 ## Known Bugs and Other Infelicities
 
