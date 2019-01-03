@@ -1,4 +1,9 @@
 R: Tests various commands as they're added to psPILOT
+T: Typed before wait
+W: 5
+T: Typed after wait
+E:
+*LABEL
 U: *TESTLABEL
 E:
 

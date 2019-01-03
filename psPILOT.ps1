@@ -115,6 +115,12 @@ function pilotcompute {
     }
 }
 
+function pilotwait {
+    param( [string]$seconds )
+
+    Start-Sleep -Seconds (expandvariables -line $seconds)
+}
+
 function loadsource {
     param( [string[]]$sourcecode )
 
@@ -226,6 +232,10 @@ while ($IP -lt $program.length)  {
                       $dest = $labels[$line[1].Trim()]
                       if ($dest -eq $null) { "U: Undefined Subroutine Label $($line[1].trim()) in line $IP" ; return }
                       $IP = $dest
+                      break
+                }
+                "W" { pilotwait -seconds $line[1]
+                      $IP++
                       break
                 }
                 "Y" { if ($script:variables["%matched"]) {                                        # Yes    - Type if the last M (match) resulted in a match

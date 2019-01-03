@@ -133,7 +133,7 @@ Example:
 
 `T(#X>#Y+#Z):Condition met...`
 
-### Extensions suggested in the Standard
+### Extensions Suggested in the Standard
 
 #### L: Link
 
@@ -141,7 +141,7 @@ Example:
 
 `«filename»` is a legal filename on the host system, which may include path information. psPILOT does not check the validity of the value, nor does it verify the existence of the file before attempting to load it.
 
-The `L` (`Link`) statement is mentioned in section 4.1 of the Standard. `«filespec»` is expected to be a program in the PILOT language, and replaces the previous program in memory. The Standard is silent on the matter of whether variables or status information (e.g., the `Accept` buffer or system variables) should be preserved or discarded upon `Link`; the documentation for Nevada PILOT implies that variables are preserved across a `Link` (which Nevada PILOT calls `LOAD`), but PSPILOT does _not_ preserve variables or other program status information.
+The `L` (`Link`) statement is mentioned in section 4.1 of the Standard. `«filespec»` is expected to be a program in the PILOT language, and replaces the previous program in memory. The Standard is silent on the matter of whether variables or status information (e.g., the `Accept` buffer or system variables) should be preserved or discarded upon `Link`; the documentation for Nevada PILOT implies that variables are preserved across a `Link` (which Nevada PILOT calls `LOAD`), but psPILOT does _not_ preserve variables or other program status information.
 
 #### P: Problem (alternatively, Parameters)
 
@@ -151,6 +151,14 @@ The `L` (`Link`) statement is mentioned in section 4.1 of the Standard. `«files
 
 The Standard suggests that this statement be used to define program sections ("problems") and to set parameters for the section. It also permits the use of `@P` as the target of a `J:`, meaning "jump to the next problem (`P:` statement)". At present, the only use of `P:` in a psPILOT program is to allow the use of `@P` in `J:` statements.
 
+#### W: Wait
+
+`W: «seconds»`
+
+`«seconds»` is a numeric expression evaluating to an integer representing the number of seconds to pause execution.
+
+The `W` (`Wait`) statement is mentioned in section 4.1 of the Standard. 
+
 #### Intraline Comments
 
 Any program line may include a comment at the end of the statement; such comments start with `//` and run to the end of the line. If you need to use the string `//` as text rather than a comment indicator, prefix _both_ slashes with backslashes (`\/\/`).
@@ -159,7 +167,7 @@ Any program line may include a comment at the end of the statement; such comment
 
 `T: This text will be printed \/\/and so will this`
 
-### Extensions not suggested in the Standard
+#### Extensions not suggested in the Standard
 
 #### Modulus Operator
 
