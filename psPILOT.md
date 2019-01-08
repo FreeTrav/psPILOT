@@ -133,6 +133,8 @@ Example:
 
 `T(#X>#Y+#Z):Condition met...`
 
+psPILOT allows compound conditions using `&&` (and), `||` (or), and `!!` (not). See **Extensions Not Suggested in the Standard**, below.
+
 ### Extensions Suggested in the Standard
 
 #### L: Link
@@ -174,6 +176,16 @@ Any program line may include a comment at the end of the statement; such comment
 The Standard specifies only that `+`, `-`, `*`, and `/` be supported for integer math. The modulus operator, returning the _remainder_ from integer division (`/`), is also supported, using the operator character `%`.
 
 `C:#ONE=5%2  //#ONE contains the value 1`
+
+#### Compound Conditions
+
+The PILOT standard (and most extant implementations) permit simple conditions only - that is, only one test may be performed. psPILOT has been extended to allow logical conjunction (_and_, `&&`), logical disjunction (_or_, `||`), and logical negation (_not_, `!!`), along with nested parentheses, in conditional expressions:
+
+`T((#A>5)&&($B="FOO")):This will be typed if \#A is greater than 5 and \$B is the string FOO`
+
+`T(!!(#B=0)):This will be typed if \#B is not equal to 0`
+
+It is strongly recommended, but not enforced, that compound conditional expressions be fully parenthesized, as in the examples.
 
 ## Known Bugs and Other Infelicities
 

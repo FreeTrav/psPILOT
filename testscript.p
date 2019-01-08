@@ -1,4 +1,9 @@
 R: Tests various commands as they're added to psPILOT
+T: This will be typed unconditionally
+T(1=1): This will be typed if simple conditions still work
+T(!!(1=2)&&(2=2)): This will be typed if compound conditions work
+E:
+*TESTWAIT
 T: Typed before wait
 W: 5
 T: Typed after wait

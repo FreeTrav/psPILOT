@@ -80,6 +80,7 @@ function pilotcondition {
             switch ($iscond.Value) {
                 '(' {
                     $temp = $cond.Replace("<>"," -ne ").Replace("<="," -le ").Replace(">="," -ge ").Replace("<"," -lt ").Replace(">"," -gt ").Replace("="," -eq ")
+                    $temp = $temp.Replace("&&"," -and ").Replace("||", " -or ").Replace("!!"," -not ")
                     $temp = Out-String -InputObject (expandvariables -line $temp -quoted).substring($iscond.Index)
                     $script:variables["%satisfied"] = Invoke-Expression -Command $temp
                     break
