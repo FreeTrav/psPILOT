@@ -100,7 +100,7 @@ The first match string (if any) that is a substring of the accept buffer is assi
 
 `T:«string-value»`
 
-'Type' operand as output to the default output device (usually the screen). Variables are expanded, but `«expression»`s that would be valid in a `C:` statement are not evaluated.
+'Type' operand as output to the default output device (usually the screen). Variables are expanded, but `«expression»`s that would be valid in a `C:` statement are not evaluated. If `«string-value»` is omitted, a blank line will be printed.
 
 ##### Y: Yes
 
