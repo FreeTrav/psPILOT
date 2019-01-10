@@ -143,7 +143,7 @@ psPILOT allows compound conditions using `&&` (and), `||` (or), and `!!` (not). 
 
 `«filename»` is a legal filename on the host system, which may include path information. psPILOT does not check the validity of the value, nor does it verify the existence of the file before attempting to load it.
 
-The `L` (`Link`) statement is mentioned in section 4.1 of the Standard. `«filespec»` is expected to be a program in the PILOT language, and replaces the previous program in memory. The Standard is silent on the matter of whether variables or status information (e.g., the `Accept` buffer or system variables) should be preserved or discarded upon `Link`; the documentation for Nevada PILOT implies that variables are preserved across a `Link` (which Nevada PILOT calls `LOAD`), but psPILOT does _not_ preserve variables or other program status information.
+The `L` (`Link`) statement is mentioned in section 4.1 of the Standard. `«filename»` is expected to be a program in the PILOT language, and replaces the previous program in memory. The Standard is silent on the matter of whether variables or status information (e.g., the `Accept` buffer or system variables) should be preserved or discarded upon `Link`; the documentation for Nevada PILOT implies that variables are preserved across a `Link` (which Nevada PILOT calls `LOAD`), but psPILOT does _not_ preserve variables or other program status information.
 
 #### P: Problem (alternatively, Parameters)
 
