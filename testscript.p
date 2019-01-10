@@ -1,4 +1,17 @@
 R: Tests various commands as they're added to psPILOT
+*WORDWRAP
+T: This is an excessively long line with too many words to fit on a single line that we want to see word wrapped (at 75) because the PILOT Specification says that text should be word wrapped.
+T:
+P: W40
+T: This is an excessively long line with too many words to fit on a single line that we want to see word wrapped (at 40) because the PILOT Specification says that text should be word wrapped.
+T:
+E:
+*HANG
+T: This is typed as a full line
+TH: This is a partial line...
+T: and this is the rest of it.
+E:
+*COMPCOND
 T: This will be typed unconditionally
 T(1=1): This will be typed if simple conditions still work
 T:

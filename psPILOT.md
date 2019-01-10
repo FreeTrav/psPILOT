@@ -20,6 +20,10 @@ In the syntax descriptions below, the following symbols are used:
 
 `«label»`: A label is an alphanumeric string prefixed by `*`. In psPILOT, the label must be the only thing on the program line; the Standard allows it to be followed by whitespace and any PILOT command.
 
+`«text»`: Text is arbitrary sequences of characters, with no specific meaning to the PILOT interpreter (though the PILOT program may attach significance to the text or a subset thereof).
+
+`«number»`: An arbitrary sequence of digits, representing a number. At present in psPILOT, the number represented should be within the system range for an integer.
+
 ### Statement Structure
 
 A PILOT statement consists of one or more letters identifying the specific operation to be performed, followed optionally by `Y`, `N`, or a conditional expression in parentheses, followed by a colon `:`, followed by one or more operands which may or may not be optional, depending on the statement. In EBNF, 
@@ -39,6 +43,8 @@ The `«command-letters»` are described below.
 Accept input into "accept buffer". If a `«variable-name»` is supplied, the input is copied into the variable. If not (an "anonymous accept"), the input can only be used (implicitly) by `M:` statements.
 
 Some implementations of PILOT permit multiple `«variable-name»`s to be supplied, with varying rules on how to parse the input to assign the values to variables. psPILOT only supports "anonymous accepts" or a single variable in an `A:` statement.
+
+The `H` modifier for the `A:` statement is ignored; accepts are always terminated with a newline that is echoed to the display.
 
 #### C: Compute
 
@@ -114,6 +120,8 @@ Equivalent to TY: (type if last match successful).
 
 Equivalent to TN: (type if last match unsuccessful)
 
+The `H` modifier may be used on `T:`, `Y:`, and `N:` statements (`TH:`, `YH:`, and `NH:`). This causes the text specified in `«string-value»` to be output without a trailing newline.
+
 #### U: Use
 
 Use (call) a subroutine. A subroutine starts with a label and ends with `E:`. psPILOT saves the line number following the call, and jumps to the designated label, continuing execution from that point. When the `E:` statement is reached, psPILOT returns to the the saved line number, and resumes execution. Different implementations of PILOT variously require, permit, or prohibit the leading `*` in the `«label»` in a `U` statement; psPILOT permits it but does not require it (i.e., `U: *TARGET` and `U: TARGET` are equivalent). 
@@ -147,11 +155,13 @@ The `L` (`Link`) statement is mentioned in section 4.1 of the Standard. `«filen
 
 #### P: Problem (alternatively, Parameters)
 
-`P: «text»`
+The Standard suggests that this statement be used to define program sections ("problems") and to set parameters for the section. It also permits the use of `@P` as the target of a `J:`, meaning "jump to the next problem (`P:` statement)".
 
-`«text»` is treated as a comment.
+ `P: «text»`
 
-The Standard suggests that this statement be used to define program sections ("problems") and to set parameters for the section. It also permits the use of `@P` as the target of a `J:`, meaning "jump to the next problem (`P:` statement)". At present, the only use of `P:` in a psPILOT program is to allow the use of `@P` in `J:` statements.
+`«text»` is optional, and treated as a comment, except for the following control sequences:
+
+`W«number»` is a 'width control', which sets the width for word-wrapping in `T`, `Y`, and `N` statements. This control sequence should be separated by anything defined in regular expressions as a word boundary (technical note: the regexp used to find this is `\bw\d+\b`). Until the next `W` control sequence is encountered, word wrap in `T`, `N`, and `Y` statements will occur at the specified value - if a `J` or `U` statement causes program execution to bypass a `P` statement with a width control, that width control does not take effect.
 
 #### W: Wait
 
@@ -206,13 +216,13 @@ Numbers in brackets represent sections of the standard from which psPILOT differ
 7. String literals in conditions must be quoted (e.g., `T($foo="bar")`, not `T($foo=bar)`). However, they should ***not*** be quoted in assignments (e.g., `C:$foo=bar`, not `C:$foo="bar"`). [2.2, 4.5]
 8. Labels are not limited to ten characters in length. [2.3]
 9. Labels as the operand of `J:` and `U:` statements do not require the initial `*`, but permit it. This is for compatibility with PILOT implementations that also do not require it, or which prohibit it. [2.3]
-10. The `H` modifier to `T` and `A` is not supported. (This is due to limitations in PowerShell). [4.3]
+10. The `H` modifier to `A` is not supported. (This is due to limitations in PowerShell). It _is_ supported for `T`, `Y`, and `N`. [4.3]
 
 ### B: To Be Changed
 
 1. Labels must be on lines by themselves (that is, you cannot do `*HERE T: We're here`). [2.3]
 2. The `F` (`File`) Core statement is not supported. Note that the standard does not specify how to select file operations, or their specific effects. [2.2, 2.3]
-3. Most Extensions of sections 4.1 through 4.4 of the standard are not supported (some will be unsupported permanently). [4.1, 4.2, 4.3, 4.4]
+3. Many Extensions in sections 4.1 through 4.4 of the standard are not supported (some will be unsupported permanently). [4.1, 4.2, 4.3, 4.4]
 4. `T`, `N`, and `Y` statements that would wrap past the maximum width of the output device do not word-wrap; they 'letter wrap'. [4.6]
 
 ### Differences from Other PILOT Implementations

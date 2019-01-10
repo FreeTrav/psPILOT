@@ -1,5 +1,7 @@
 # psPILOT Changelog
 
+2019-01-10	Implemented word-wrap and `H` modifier for `T:`, `Y:`, and `N:`. Implemented setting print width using `P:W##`.
+
 2019-01-08	Compound conditionals implemented.
 
 2019-01-03	`W:` statement implemented.

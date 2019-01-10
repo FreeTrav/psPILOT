@@ -14,6 +14,8 @@ $variables["%matched"] = $false
 
 $variables["%uselevel"] = 0
 
+$printwidth = 75
+
 $labels = @{}
 
 $retloc = @()
@@ -21,7 +23,6 @@ $retloc = @()
 $condition = $false
 
 $prevcmd = ""
-
 
 # Support functions
 
@@ -44,9 +45,19 @@ function expandvariables {
 
 function pilottype {
 # implements the T: command
-    param ( [string]$textline )
+    param ( [string]$textline,
+            [int]$width
+          )
 
-    expandvariables -line $textline.trim()
+    $text = (expandvariables -line $textline.trim())
+    $retval = @()
+    while ($text.Length -gt $width) {
+        $lastspace = $text.substring(0,$width).LastIndexOf(' ')
+        $retval += ,($text.substring(0,$lastspace))
+        $text = $text.substring($lastspace+1,$text.Length-($lastspace+1))
+    }
+    $retval += $text
+    $retval
 }
 
 function pilotaccept {
@@ -146,6 +157,14 @@ function loadsource {
     $script:IP = 0
 }
 
+function pilotsetparams {
+    param ( [string]$paramline )
+
+    if ($paramline -match "\bw(?<width>\d+)\b") {
+        $script:printwidth = 0 + $matches['width']
+    }
+}
+
 
 
 # Main code
@@ -212,14 +231,29 @@ while ($IP -lt $program.length)  {
                       break
                 }
                 "N" { if (-not $script:variables["%matched"]) {                                   # No     - Type if the last M (match) resulted in no match
-                          pilottype -textline $line[1]
+                          if ($line[0] -match "H") {
+                              $out = (pilottype -textline $line[1] -width $printwidth)
+                              $out[0..$out.length-2] | Write-Host
+                              $out[-1] | Write-Host -NoNewline
+                          } else {
+                              (pilottype -textline $line[1] -width $printwidth) | Write-Host
+                          }
                       }
                       $IP++
                       break
                 }
-                "P" { $IP++ ; break; }                                       # Problem - equivalent to R:, but allows J:@P
+                "P" { pilotsetparams -paramline $line[1]
+                      $IP++
+                      break
+                }                                       # Problem - equivalent to R:, but allows J:@P
                 "R" { $IP++ ; break; }                                       # Remark - comment line, does nothing
-                "T" { pilottype -textline $line[1]                           # Type   - Output text to console
+                "T" { if ($line[0] -match "H") {                             # Type   - Output text to console
+                          $out = (pilottype -textline $line[1] -width $printwidth)
+                          $out[0..$out.length-2] | Write-Host
+                          $out[-1] | Write-Host -NoNewline
+                      } else {
+                          (pilottype -textline $line[1] -width $printwidth) | Write-Host
+                      }
                       $IP++
                       break
                 }
@@ -240,7 +274,13 @@ while ($IP -lt $program.length)  {
                       break
                 }
                 "Y" { if ($script:variables["%matched"]) {                                        # Yes    - Type if the last M (match) resulted in a match
-                      pilottype -textline $line[1]
+                          if ($line[0] -match "H") {
+                              $out = (pilottype -textline $line[1] -width $printwidth)
+                              $out[0..$out.length-2] | Write-Host
+                              $out[-1] | Write-Host -NoNewline
+                          } else {
+                              (pilottype -textline $line[1] -width $printwidth) | Write-Host
+                          }
                       }
                       $IP++
                       break
