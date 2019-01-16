@@ -4,7 +4,7 @@
 
 psPILOT is an implementation of the PILOT programming language (**P**rogrammed **I**nstruction, **L**earning, **O**r **T**eaching) written entirely in Microsoft's PowerShell scripting language. It implements most of the PILOT Core language as defined in the (now withdrawn) IEEE standard 1154 of 1991 (Corrected to November 1991). For historical information on and an overview of the language, the reader is referred to [Wikipedia's page on the PILOT language](https://en.wikipedia.org/wiki/PILOT).
 
-This implementation has been tested using PowerShell 5 on Windows 7 and PowerShell 6 on Linux Mint, but it should work without issue on any PowerShell 5 or later system, and quite likely on any PowerShell 3 or later system.
+This implementation has been tested using PowerShell 5 on Windows 7 and PowerShell 6 on Linux Mint, but it should work without issue on any PowerShell 5 or later system.
 
 ## psPILOT Syntax
 
@@ -29,6 +29,24 @@ In the syntax descriptions below, the following symbols are used:
 A PILOT statement consists of one or more letters identifying the specific operation to be performed, followed optionally by `Y`, `N`, or a conditional expression in parentheses, followed by a colon `:`, followed by one or more operands which may or may not be optional, depending on the statement. In EBNF, 
 
 `«statement»::=«command-letters»["Y"|"N"|(«conditional-expression»)]:[«operands»]`
+
+The `«command-letters»` may be omitted only if there is a previous line where they were _not_ omitted; the omitted `«command-letters»` will be assumed to be the same as the most recent non-omitted one.
+
+`T: This is line one`
+
+`: This is line two`
+
+`: This is line three`
+
+is considered to be the same as
+
+`T: This is line one`
+
+`T: This is line two`
+
+`T: This is line three`
+
+
 
 The `«command-letters»` are described below.
 
@@ -90,9 +108,11 @@ Jump to the line of the program indicated by `«label»`. If there is no line in
 
 `M:«match-value-list»`
 
+`«match-value-list»` is a list of string values, separated by `,`, `!`, or `|`.
+
 Match the accept buffer against string variables or string literals. Multiple values may be given separated by `,`, `!`, or `|`. 
 
-The match flag is set to 'yes' or 'no', depending on whether a match is made. Any statement that has a Y following the command letter is processed only if the match flag is set. Statements with N are processed only if the flag is not set.
+The match flag is set to 'yes' or 'no', depending on whether a match is made. Any statement that has a Y following the command letter is processed only if the match flag is set to 'yes'. Statements with N are processed only if the flag is set to 'no'.
 
 The first match string (if any) that is a substring of the accept buffer is assigned to the special (system) variable `%MATCH`. The buffer characters left of the first match are assigned to `%LEFT`, and the characters on the right are assigned to `%RIGHT`.
 
@@ -120,7 +140,7 @@ Equivalent to TY: (type if last match successful).
 
 Equivalent to TN: (type if last match unsuccessful)
 
-The `H` modifier may be used on `T:`, `Y:`, and `N:` statements (`TH:`, `YH:`, and `NH:`). This causes the text specified in `«string-value»` to be output without a trailing newline.
+The `H` modifier may be used on `T:`, `Y:`, and `N:` statements (`TH:`, `YH:`, and `NH:`). This causes the text specified in `«string-value»` to be output without a trailing newline. This is an extension mentioned in section 4.3 of the Standard for `T`, but not for `Y` or `N`.
 
 #### U: Use
 
@@ -153,7 +173,7 @@ psPILOT allows compound conditions using `&&` (and), `||` (or), and `!!` (not). 
 
 The `L` (`Link`) statement is mentioned in section 4.1 of the Standard. `«filename»` is expected to be a program in the PILOT language, and replaces the previous program in memory. The Standard is silent on the matter of whether variables or status information (e.g., the `Accept` buffer or system variables) should be preserved or discarded upon `Link`; the documentation for Nevada PILOT implies that variables are preserved across a `Link` (which Nevada PILOT calls `LOAD`), but psPILOT does _not_ preserve variables or other program status information.
 
-#### P: Problem (alternatively, Parameters)
+#### P: Problem (_alternatively, Parameters_)
 
 The Standard suggests that this statement be used to define program sections ("problems") and to set parameters for the section. It also permits the use of `@P` as the target of a `J:`, meaning "jump to the next problem (`P:` statement)".
 
@@ -162,6 +182,10 @@ The Standard suggests that this statement be used to define program sections ("p
 `«text»` is optional, and treated as a comment, except for the following control sequences:
 
 `W«number»` is a 'width control', which sets the width for word-wrapping in `T`, `Y`, and `N` statements. This control sequence should be separated by anything defined in regular expressions as a word boundary (technical note: the regexp used to find this is `\bw\d+\b`). Until the next `W` control sequence is encountered, word wrap in `T`, `N`, and `Y` statements will occur at the specified value - if a `J` or `U` statement causes program execution to bypass a `P` statement with a width control, that width control does not take effect.
+
+The default width for word-wrapping is 75 characters.
+
+The `P` (`Problem`) statement is mentioned in section 4.1 of the Standard. No discussion of what parameters should be supported, or with what specific syntax, is included.
 
 #### W: Wait
 
@@ -177,9 +201,11 @@ Any program line may include a comment at the end of the statement; such comment
 
 `T: This text will be printed //this text will not`
 
-`T: This text will be printed \/\/and so will this`
+`T: This text will be printed \/\/and so will this, including the slashes`
 
-#### Extensions not suggested in the Standard
+Intraline comments are mentioned in section 4.7 of the Standard.
+
+### Extensions not suggested in the Standard
 
 #### Modulus Operator
 
@@ -211,7 +237,7 @@ Numbers in brackets represent sections of the standard from which psPILOT differ
 2. The `G` (`Graphic`) Core statement simply prints a message `psPILOT does not support graphics`, but does not throw an error. [2.2, 2.3]
 3. Variables must use the type-indicator as the lead character; strings must be `$name`, numbers must be `#name`. [3.1, 3.2]
 4. The system variables `%expression`, `%term`, `%factor`, `%nextstmt`, `%maxuses`, `%return*`, `%relation`, and `%text` are not supported. [2.3]
-5. The standard states that early (pre-Standard) implementations of the `C` (`Compute`) statement 'dropped' into the host language (most PILOT interpreters were not in machine-native code, but ran 'on top' of other languages like BASIC) to evaluate the expression, and implies that the conformant interpreter should parse the expression and evaluate it directly, using conventions similar to those of BASIC. psPILOT returns to the original design, and internally converts the BASIC-convention expressions into PowerShell conventions, and then asks PowerShell to evaluate them. This is the reason that the system variables `%expression`, `%term`, and `%factor`, mentioned in 4. above, are not available.
+5. The standard states that early (pre-Standard) implementations of the `C` (`Compute`) statement 'dropped' into the host language (most PILOT interpreters were not in machine-native code, but ran 'on top' of other languages like BASIC) to evaluate the expression, and implies that the conformant interpreter should parse the expression and evaluate it directly, using conventions similar to those of BASIC. psPILOT returns to the original design, and internally converts the BASIC-convention expressions into PowerShell conventions, and then asks PowerShell to evaluate them. This is the reason that the system variables `%expression`, `%term`, and `%factor`, mentioned in 4. above, are not available. (The same technique is also used for handling conditional expressions.)
 6. There is no defined limit on the number of levels of `U` statement nesting; this is the reason that the system variables `%maxuses` and `%return*`, mentioned in 4. above, are not supported.
 7. String literals in conditions must be quoted (e.g., `T($foo="bar")`, not `T($foo=bar)`). However, they should ***not*** be quoted in assignments (e.g., `C:$foo=bar`, not `C:$foo="bar"`). [2.2, 4.5]
 8. Labels are not limited to ten characters in length. [2.3]
@@ -223,10 +249,9 @@ Numbers in brackets represent sections of the standard from which psPILOT differ
 1. Labels must be on lines by themselves (that is, you cannot do `*HERE T: We're here`). [2.3]
 2. The `F` (`File`) Core statement is not supported. Note that the standard does not specify how to select file operations, or their specific effects. [2.2, 2.3]
 3. Many Extensions in sections 4.1 through 4.4 of the standard are not supported (some will be unsupported permanently). [4.1, 4.2, 4.3, 4.4]
-4. `T`, `N`, and `Y` statements that would wrap past the maximum width of the output device do not word-wrap; they 'letter wrap'. [4.6]
 
 ### Differences from Other PILOT Implementations
 
-1. **RPILOT:** The `S` command (execute a system command) and the `X` command (Execute a string as a PILOT command) are not supported. Note that the Standard recommends that `S` be used for playing sound, and execution of system commands use the two-character command `XS`.
+1. **RPILOT:** The `S` command (execute a system command) and the `X` command (Execute a string as a PILOT command) are not supported. Note that the Standard recommends that `S` be used for playing sound, and execution of system commands use the two-character command `XS`, with `X` suggested as the command for executing a string expression as a psPILOT statement.
 2. **RPILOT** allows matching in the `M` statement of any of several words separating them with spaces (e.g., `M: YES YEP YEA`) . IEEE Standard 1154-1991 does not indicate that this is permissible, specifying only `,`, `!`, or `|` as separators (e.g., `M: YES, YEP, YEA`). psPILOT follows the standard, not RPILOT, in this.
 3. **Nevada PILOT** allowed leading or trailing spaces in multiple-alternative matches - that is, `M:THIS,THAT` was different from `M:THIS , THAT` - the latter matched the word THIS followed by a space, or the word THAT following a space. psPILOT does not support matching leading or trailing spaces.
