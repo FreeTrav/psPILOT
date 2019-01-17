@@ -1,4 +1,5 @@
 R: Tests various commands as they're added to psPILOT
+J: *COMPUTE
 *WORDWRAP
 T: This is an excessively long line with too many words to fit on a single line that we want to see word wrapped (at 75) because the PILOT Specification says that text should be word wrapped.
 T:
@@ -52,6 +53,9 @@ E:
 R: Tests numerics
 C: #NUMBER = (22 / 7) * 100
 T: \#NUMBER should be 314. Actually is #NUMBER
+R: Test numerics with variables
+C: #NUMBER = #NUMBER / 2
+T: \#NUMBER should be 157. Actually is #NUMBER
 R: Test strings
 C: $STRING = TEXT
 T: \$STRING is $STRING. Test head-concatenation:

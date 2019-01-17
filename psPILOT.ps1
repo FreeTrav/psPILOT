@@ -123,7 +123,7 @@ function pilotcompute {
         $script:variables[$varname] = expandvariables -line $varval
     } elseif ($expr[0] -eq "#") {
         $varname, $varval = ($expr -split "=").trim()
-        [int]$script:variables[$varname] = [Math]::Round((Invoke-Expression -Command $varval))
+        [int]$script:variables[$varname] = [Math]::Round((Invoke-Expression -Command (expandvariables -line $varval)))
     }
 }
 
@@ -242,10 +242,10 @@ while ($IP -lt $program.length)  {
                       $IP++
                       break
                 }
-                "P" { pilotsetparams -paramline $line[1]
+                "P" { pilotsetparams -paramline $line[1]                     # Problem - allows J:@P, set print width ("Wnn")
                       $IP++
                       break
-                }                                       # Problem - equivalent to R:, but allows J:@P
+                }
                 "R" { $IP++ ; break; }                                       # Remark - comment line, does nothing
                 "T" { if ($line[0] -match "H") {                             # Type   - Output text to console
                           $out = (pilottype -textline $line[1] -width $printwidth)
