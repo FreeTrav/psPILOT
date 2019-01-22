@@ -108,7 +108,9 @@ There are a few special jumps that are permitted without using labels; all are s
 
 `@A`: Jump to the most-recently executed `A:` (`Accept`) statement.
 
-`@F`: Jump to the most-recently executed `FR:` (`File/Read`) statement.
+`@R`: Jump to the most-recently executed `FR:` (`File/Read`) statement.
+
+`@W`: Jump to the most-recently executed `FW:` (`File/Write`) statement.
 
 `@M`: Jump to the next `M:` (`Match`) statement.
 
@@ -296,6 +298,10 @@ The PILOT standard (and most extant implementations) permit simple conditions on
 `T(!!(#B=0)):This will be typed if \#B is not equal to 0`
 
 It is strongly recommended, but not enforced, that compound conditional expressions be fully parenthesized, as in the examples.
+
+#### Shorthand Jumps ("@-Jumps")
+
+In addition to the `@P`, `@M`, and `@A` jumps recommended in section 4.9 of the Standard, psPILOT supports `@R` for jumping to the most-recently executed `FR:` statement, and `@W` for jumping to the most-recently executed `FW:` statement.
 
 ## Known Bugs and Other Infelicities
 

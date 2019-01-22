@@ -1,5 +1,7 @@
 # psPILOT Changelog
 
+2019-01-22	Implemented file commands and @-jumps
+
 2019-01-17	Fixed a bug where variables were not being expanded in `C:` statements if the result was expected to be numeric.
 
 2019-01-10	Implemented word-wrap and `H` modifier for `T:`, `Y:`, and `N:`. Implemented setting print width using `P:W##`.
