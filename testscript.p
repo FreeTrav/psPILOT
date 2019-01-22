@@ -1,5 +1,5 @@
 R: Tests various commands as they're added to psPILOT
-J: *COMPUTE
+J: *FILE
 *WORDWRAP
 T: This is an excessively long line with too many words to fit on a single line that we want to see word wrapped (at 75) because the PILOT Specification says that text should be word wrapped.
 T:
@@ -78,4 +78,16 @@ T: This line should not be printed
 *NOSTAR
 T: This line is printed.
 E:
-
+*FILE
+T: Testing File Commands...
+T: 1. Create a new file
+FN: #newfile, Z:test.txt
+FW: #newfile, This is a test, line one.
+FW: #newfile, This is line two.
+FC: #newfile
+T: 2. Read a file
+FO: #oldfile, Z:test.txt
+FR: #oldfile, $linein
+T: $linein
+FC: #oldfile
+E:

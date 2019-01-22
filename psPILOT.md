@@ -26,9 +26,9 @@ In the syntax descriptions below, the following symbols are used:
 
 ### Statement Structure
 
-A PILOT statement consists of one or more letters identifying the specific operation to be performed, followed optionally by `Y`, `N`, or a conditional expression in parentheses, followed by a colon `:`, followed by one or more operands which may or may not be optional, depending on the statement. In EBNF, 
+A PILOT statement consists of one or more letters identifying the specific operation to be performed, followed optionally by `Y`, `N`,  `E`, or a conditional expression in parentheses, followed by a colon `:`, followed by one or more operands which may or may not be optional, depending on the statement. In EBNF, 
 
-`«statement»::=«command-letters»["Y"|"N"|(«conditional-expression»)]:[«operands»]`
+`«statement»::=«command-letters»["Y"|"N"|"E"|(«conditional-expression»)]:[«operands»]`
 
 The `«command-letters»` may be omitted only if there is a previous line where they were _not_ omitted; the omitted `«command-letters»` will be assumed to be the same as the most recent non-omitted one.
 
@@ -104,6 +104,16 @@ End (return from) subroutine or (if outside of a subroutine) end the program. In
 
 Jump to the line of the program indicated by `«label»`. If there is no line in the program matching the `«label»`, psPILOT will report that the label is undefined and exit the PILOT program. Different implementations of PILOT variously require, permit, or prohibit the leading `*` in the `«label»` in a `J` statement; psPILOT permits it but does not require it (i.e., `J: *TARGET` and `J: TARGET` are equivalent). 
 
+There are a few special jumps that are permitted without using labels; all are single letters preceded by `@`:
+
+`@A`: Jump to the most-recently executed `A:` (`Accept`) statement.
+
+`@F`: Jump to the most-recently executed `FR:` (`File/Read`) statement.
+
+`@M`: Jump to the next `M:` (`Match`) statement.
+
+`@P`: Jump to the next `P:` (`Problem` or `Parameter`) statement.
+
 #### M: Match
 
 `M:«match-value-list»`
@@ -146,6 +156,16 @@ The `H` modifier may be used on `T:`, `Y:`, and `N:` statements (`TH:`, `YH:`, a
 
 Use (call) a subroutine. A subroutine starts with a label and ends with `E:`. psPILOT saves the line number following the call, and jumps to the designated label, continuing execution from that point. When the `E:` statement is reached, psPILOT returns to the the saved line number, and resumes execution. Different implementations of PILOT variously require, permit, or prohibit the leading `*` in the `«label»` in a `U` statement; psPILOT permits it but does not require it (i.e., `U: *TARGET` and `U: TARGET` are equivalent). 
 
+#### Conditional Execution
+
+A psPILOT statement may be executed conditionally by including `Y`, `N`, `E`, or a parenthesized conditional expression (see next section) after the command letter. In all cases, if the condition represented is true, the statement will be executed, otherwise it will be skipped. The meaning of the conditional letters is as follows:
+
+`Y`: The result of the most-recently executed `M:` (`Match`) statement was true (there was a match).
+
+`N`: The result of the most-recently executed `M:` (`Match`) statement was false (there was no match).
+
+`E`: The most-recently executed `FR:` (`File/Read`) statement encountered an end-of-file condition.
+
 #### Conditional Expressions (Parentheses)
 
 If there is parenthesized expression in a statement, it is a conditional expression, and the statement is processed only if the test has a value of 'true'. In EBNF, the conditional expression is 
@@ -164,6 +184,60 @@ Example:
 psPILOT allows compound conditions using `&&` (and), `||` (or), and `!!` (not). See **Extensions Not Suggested in the Standard**, below.
 
 ### Extensions Suggested in the Standard
+
+#### F: File Commands
+
+The F command is listed as a Core Statement in the standard; however, no details are given. Some suggestions are given in Modifiers (section 4.3), but again without specifying behavior. 
+
+psPILOT assumes that all file interaction will be as line-structured text, rather than structured data files.
+
+File operations may be destructive of data. psPILOT does _not_ attempt to protect the author from such destruction.
+
+psPILOT uses the following commands for file operations:
+
+##### FA: Open File for Appending
+
+`FA: «#handlevar», «filename»`
+
+`«#handlevar»` is a numeric variable - _not_ a numeric value - which will hold the "file handle" for the file to be opened. `«filename»` is a system-dependent file name, including path. psPILOT does not check the filename for validity. `«#handlevar»` is subsequently used to identify the file for write operations and to close the file when done. If the file exists, the data in it will be preserved, and writes to the file will be appended at the end of the file. If the file does not exist, it will be created.
+
+##### FB: Open File, Blank, for Writing
+
+`FB: «#handlevar», «filename»`
+
+`«#handlevar»` is a numeric variable - _not_ a numeric value - which will hold the "file handle" for the file to be opened. `«filename»` is a system-dependent file name, including path. psPILOT does not check the filename for validity. `«#handlevar»` is subsequently used to identify the file for write operations and to close the file when done. If the file exists, the data in it will be destroyed, and replaced by any data written to the file. If the file does not exist, it will be created.
+
+##### FC: Close File
+
+`FC: «#handlevar»`
+
+`«#handlevar»` is the "file handle" created when the file was opened (using `FO:`, `FA:`, or `FB:`). Close the file. Further attempts to read or write to the file (unless it is re-opened with `FO:`, `FA:`, or `FB:`) will be invalid, and will cause an error.
+
+##### FD: Delete File
+
+`FD: «filename»`
+
+Removes the file specified by `«filename»` from the system.
+
+##### FO: Open File for Reading
+
+`FO: «#handlevar», «filename»`
+
+`«#handlevar»` is a numeric variable - _not_ a numeric value - which will hold the "file handle" for the file to be opened. `«filename»` is a system-dependent file name, including path. psPILOT does not check the filename for validity. `«#handlevar»` is subsequently used to identify the file for read operations and to close the file when done. If the file does not exist, the system will throw an error.
+
+##### FR: Read a Line of Text from a File
+
+`FR: «#handlevar», «$inputvariable»`
+
+`«#handlevar»` is the "file handle" created when the file was opened using `FO:`. `«$inputvariable»`  is a string variable - _not_ a string value - in which the data read will be stored. 
+
+If an attempt to read past the end of the existing data is made, a flag will be set, and conditional execution using the `E` condition flag will succeed.
+
+##### FW: Write a Line of Text to a File
+
+`FW: «#handlevar», «string-value»`
+
+`«#handlevar»` is the "file handle" created when the file was opened with `FA:` or `FB:`. `«string-value»` is the data to be written to the file.
 
 #### L: Link
 

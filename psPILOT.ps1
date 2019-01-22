@@ -14,6 +14,8 @@ $variables["%matched"] = $false
 
 $variables["%uselevel"] = 0
 
+$variables["%eof"] = $false
+
 $printwidth = 75
 
 $labels = @{}
@@ -23,6 +25,14 @@ $retloc = @()
 $condition = $false
 
 $prevcmd = ""
+
+$files = @()
+
+$atread = -1
+
+$atwrite = -1
+
+$ataccept = -1
 
 # Support functions
 
@@ -86,7 +96,7 @@ function pilotcondition {
     param ( [string]$cond )
 
     if ($cond.Length -ne 1) {
-        $iscond = ($cond | Select-String -Pattern "\(|Y|N").Matches
+        $iscond = ($cond | Select-String -Pattern "\(|Y|N|E").Matches
         if ($iscond.Success) {
             switch ($iscond.Value) {
                 '(' {
@@ -103,6 +113,10 @@ function pilotcondition {
                 'N' {
                     $script:variables["%satisfied"] = $false
                     if (-not $script:variables["%matched"]) { $script:variables["%satisfied"] = $true; break }
+                }
+                'E' {
+                    $script:variables["%satisfied"] = $false
+                    if ($script:variables["%eof"]) { $script:variables["%satisfied"] = $true; break }
                 }
                 default {$script:variables["%satisfied"] = $false }
             }
@@ -165,6 +179,42 @@ function pilotsetparams {
     }
 }
 
+function pilotfilecommand {
+    param ( [string]$subcommand,
+            [string]$inputline )
+
+    $handlevar,$filecommand = $inputline -split ",",2
+    switch ($subcommand) {
+        "A" { $script:variables[$handlevar] = $script:files.Length                              # Open - New File or Append
+              $temp = New-Object -TypeName System.IO.StreamWriter($filecommand.trim(),$true)
+              $script:files += ,($temp)
+              break
+        }
+        "B" { $script:variables[$handlevar] = $script:files.Length                              # Open - Blank for writing (overwrite or new)
+              $temp = New-Object -TypeName System.IO.StreamWriter($filecommand.trim(),$false)
+              $script:files += ,($temp)
+              break
+        }
+        "C" { [void]$script:files[$script:variables[$handlevar]].Close(); break }               # Close
+        "D" { Remove-Item (expandvariables -line $handlevar) }
+        "O" { $script:variables[$handlevar] = $script:files.Length                              # Open for Read
+              $temp = New-Object -TypeName System.IO.StreamReader($filecommand.trim())
+              $script:files += ,($temp)
+              break
+        }
+        "R" { if (!$script:files[$script:variables[$handlevar]].EndOfStream) {                    # Read a line of text
+                  $script:variables[$filecommand.trim()] = $script:files[$script:variables[$handlevar]].ReadLine()
+                  $script:variables["%eof"] = $false
+            } else { $script:variables["%eof"] = $true 
+            }
+            $script:atread = $script:IP
+            break
+        }
+        "W" { $script:files[$script:variables[$handlevar]].WriteLine((expandvariables -line $filecommand)); $script:atwrite = $script:IP; $break} # Write a line of text
+        default { "Unimplemented file command F$subcommand encountered"; return }
+    }
+}
+
 
 
 # Main code
@@ -180,6 +230,7 @@ while ($IP -lt $program.length)  {
         if (pilotcondition -cond $line[0]) {
             switch ($line[0][0]) {
                 "A" { pilotaccept -acceptvar $line[1].trim()                 # Accept - take user input from the default input stream
+                  $ataccept = $IP
                   $IP++
                   break
                 }
@@ -195,14 +246,17 @@ while ($IP -lt $program.length)  {
                       break
                   } 
                 }
+                "F" { pilotfilecommand -subcommand $line[0][1] -inputline $line[1].trim()
+                      $IP++
+                      break
+                }
                 "G" { "psPILOT does not support graphics"
                       $IP++
                       break
                 }
                 "J" { if (($line[1].trim())[0] -eq "@") {                        #Jump
                           switch (($line[1].trim())[1]) {
-                              "A" { while ($program[$IP--][0] -ne "A") {}        #      To the previous A:
-                                    $IP++
+                              "A" { $IP = $ataccept        #      To the previous A:
                                     break
                               }
                               "M" { while ($program[$IP++][0] -ne "M") {}        #      To the next M:
@@ -211,6 +265,12 @@ while ($IP -lt $program.length)  {
                               }
                               "P" { while ($program[$IP++][0] -ne "P") {}        #      To the next P:
                                     $IP--
+                                    break
+                              }
+                              "R" { $IP = $atread        #      To the previous FR:
+                                    break
+                              }
+                              "W" { $IP = $atwrite        #      To the previous FW:
                                     break
                               }
                           }
