@@ -255,7 +255,7 @@ The Standard suggests that this statement be used to define program sections ("p
 
  `P: «text»`
 
-`«text»` is optional, and treated as a comment, except for the following control sequences:
+`«text»` is optional, and treated by psPILOT as a comment, except for the following control sequences:
 
 `W«number»` is a 'width control', which sets the width for word-wrapping in `T`, `Y`, and `N` statements. This control sequence should be separated by anything defined in regular expressions as a word boundary (technical note: the regexp used to find this is `\bw\d+\b`). Until the next `W` control sequence is encountered, word wrap in `T`, `N`, and `Y` statements will occur at the specified value - if a `J` or `U` statement causes program execution to bypass a `P` statement with a width control, that width control does not take effect.
 
@@ -305,7 +305,7 @@ In addition to the `@P`, `@M`, and `@A` jumps recommended in section 4.9 of the 
 
 ## Known Bugs and Other Infelicities
 
-1. Running off the end of the program (no `E` statement) while in a subroutine call (`U` statement) does not return from the subroutine.
+There are no known bugs or other infelicities at the present time.
 
 ## Differences between IEEE Standard PILOT and psPILOT
 
@@ -327,8 +327,7 @@ Numbers in brackets represent sections of the standard from which psPILOT differ
 ### B: To Be Changed
 
 1. Labels must be on lines by themselves (that is, you cannot do `*HERE T: We're here`). [2.3]
-2. The `F` (`File`) Core statement is not supported. Note that the standard does not specify how to select file operations, or their specific effects. [2.2, 2.3]
-3. Many Extensions in sections 4.1 through 4.4 of the standard are not supported (some will be unsupported permanently). [4.1, 4.2, 4.3, 4.4]
+2. Many Extensions in sections 4.1 through 4.4 of the standard are not supported (some will be unsupported permanently). [4.1, 4.2, 4.3, 4.4]
 
 ### Differences from Other PILOT Implementations
 
@@ -336,3 +335,4 @@ Numbers in brackets represent sections of the standard from which psPILOT differ
 2. **RPILOT** allows matching in the `M` statement of any of several words separating them with spaces (e.g., `M: YES YEP YEA`) . IEEE Standard 1154-1991 does not indicate that this is permissible, specifying only `,`, `!`, or `|` as separators (e.g., `M: YES, YEP, YEA`). psPILOT follows the standard, not RPILOT, in this.
 3. **Nevada PILOT** allowed leading or trailing spaces in multiple-alternative matches - that is, `M:THIS,THAT` was different from `M:THIS , THAT` - the latter matched the word THIS followed by a space, or the word THAT following a space. psPILOT does not support matching leading or trailing spaces.
 4. **Nevada PILOT** allowed `@P` and `@M` as targets for `U:` (`Use`) statements. psPILOT does not support this usage.
+5. **Nevada PILOT** allowed indirect references in string variables by using multiple `$`, e.g., if `$foo` contains `bar` and `$bar` contains `baz`, one could use the expression `$$foo` and it would evaluate to `baz`. This usage is not supported by psPILOT.

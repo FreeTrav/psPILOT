@@ -159,6 +159,7 @@ function loadsource {
             $locallabels[$code] = $localprog.Length - 1
         }
     }
+    $localprog += ,("E:" -split ":",2)
     $script:program = $localprog
     $script:labels = $locallabels
     $script:variables = @{}
@@ -222,7 +223,6 @@ function pilotfilecommand {
 loadsource -sourcecode $sourcecode
 
 $IP = 0
-
 while ($IP -lt $program.length)  {
     $line = $program[$IP]
     if ($line.Length -gt 1) {
@@ -329,7 +329,7 @@ while ($IP -lt $program.length)  {
                       $IP = $dest
                       break
                 }
-                "W" { pilotwait -seconds $line[1]
+                "W" { pilotwait -seconds (expandvariables $line[1])
                       $IP++
                       break
                 }

@@ -1,5 +1,7 @@
 # psPILOT Changelog
 
+2019-01-25	Fixed a bug where if a subroutine was at the end of the source file and the `E:` statement was omitted, the program would not return from the subroutine.
+
 2019-01-22	Implemented file commands and @-jumps
 
 2019-01-17	Fixed a bug where variables were not being expanded in `C:` statements if the result was expected to be numeric.
