@@ -128,6 +128,8 @@ The match flag is set to 'yes' or 'no', depending on whether a match is made. An
 
 The first match string (if any) that is a substring of the accept buffer is assigned to the special (system) variable `%MATCH`. The buffer characters left of the first match are assigned to `%LEFT`, and the characters on the right are assigned to `%RIGHT`.
 
+Matches are case-insensitive by default. Case-sensitivity for M: and parenthesized conditionals can be turned on; see the **P:** statement.
+
 #### R: Remark
 
 `R: «text»`
@@ -176,7 +178,7 @@ If there is parenthesized expression in a statement, it is a conditional express
 
 `«relational-operator»::="<"|"<="|"="|">="|">"|"<>"`
 
-If the `«value»`s are strings, comparison is done using case-insensitive lexical ordering, i.e., `"A"="a"` will be true.
+If the `«value»`s are strings, comparison is done using lexical ordering; the default is case-insensitive, i.e., `"A"="a"` will be true. Case-sensitivity may be turned on for these comparisons and the M: statement; see the **P:** statement.
 
 Example:
 `R:Type message if x>y+z`
@@ -260,6 +262,10 @@ The Standard suggests that this statement be used to define program sections ("p
 `W«number»` is a 'width control', which sets the width for word-wrapping in `T`, `Y`, and `N` statements. This control sequence should be separated by anything defined in regular expressions as a word boundary (technical note: the regexp used to find this is `\bw\d+\b`). Until the next `W` control sequence is encountered, word wrap in `T`, `N`, and `Y` statements will occur at the specified value - if a `J` or `U` statement causes program execution to bypass a `P` statement with a width control, that width control does not take effect.
 
 The default width for word-wrapping is 75 characters.
+
+`CS` instructs the psPILOT interpreter to use case-sensitive matching in `M` statements and parenthesized conditionals. When case-sensitive matching is turned on, "A"="a" will be false; it is normally true.
+
+`CI` instructs the psPILOT interpreter to use case-insensitive matching in `M` statements and parenthesized conditionals. This is the default, but the instruction is provided to enable turning off case-sensitivity after it has been turned on.
 
 The `P` (`Problem`) statement is mentioned in section 4.1 of the Standard. No discussion of what parameters should be supported, or with what specific syntax, is included.
 
