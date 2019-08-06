@@ -1,5 +1,5 @@
 R: Tests various commands as they're added to psPILOT
-J: *FILE
+J: *CASE
 *WORDWRAP
 T: This is an excessively long line with too many words to fit on a single line that we want to see word wrapped (at 75) because the PILOT Specification says that text should be word wrapped.
 T:
@@ -90,4 +90,13 @@ FO: #oldfile, Z:test.txt
 FR: #oldfile, $linein
 T: $linein
 FC: #oldfile
+E:
+*CASE
+R: Turn on case-sensitivity
+P: CS
+C: $foo = Case
+T: $foo
+T($foo="CASE"): Case-sensitivity is not working.
+P: CI
+T($foo<>"CASE"): Case-INsensitivity is not working.
 E:

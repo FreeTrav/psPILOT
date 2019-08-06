@@ -1,5 +1,7 @@
 # psPILOT Changelog
 
+2019-08-06	Implemented optional case-sensitivity for text comparisons in M: and (conditionals). To turn on case-sensitivity, include "CS" on a P: line; to turn it off, include "CI". The default remains case-insensitive.
+
 2019-01-25	Fixed a bug where if a subroutine was at the end of the source file and the `E:` statement was omitted, the program would not return from the subroutine.
 
 2019-01-22	Implemented file commands and @-jumps

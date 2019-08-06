@@ -18,6 +18,8 @@ $variables["%eof"] = $false
 
 $printwidth = 75
 
+$casesensitive = $false
+
 $labels = @{}
 
 $retloc = @()
@@ -83,7 +85,11 @@ function pilotmatch {
     param ( [string]$matchvalue )
 
     $matchvalue = $matchvalue = [regex]::Replace($matchvalue,'(?<=(?<!\\)(?:\\{2})*)[\,\!]', '|')
-    $temp = ($script:variables["%answer"] | Select-String -Pattern $matchvalue).Matches
+    if ($script:casesensitive) {
+        $temp = ($script:variables["%answer"] | Select-String -CaseSensitive -Pattern $matchvalue).Matches
+    } else {
+        $temp = ($script:variables["%answer"] | Select-String -Pattern $matchvalue).Matches
+    }
     $script:variables["%matched"] = $temp.Success
     $script:variables["%match"] = $temp.Value
     $script:variables["%satisfied"] = $script:variables["%matched"]
@@ -100,7 +106,11 @@ function pilotcondition {
         if ($iscond.Success) {
             switch ($iscond.Value) {
                 '(' {
-                    $temp = $cond.Replace("<>"," -ne ").Replace("<="," -le ").Replace(">="," -ge ").Replace("<"," -lt ").Replace(">"," -gt ").Replace("="," -eq ")
+                    if ($script:casesensitive) {
+                        $temp = $cond.Replace("<>"," -cne ").Replace("<="," -cle ").Replace(">="," -cge ").Replace("<"," -clt ").Replace(">"," -cgt ").Replace("="," -ceq ")
+                    } else {
+                        $temp = $cond.Replace("<>"," -ne ").Replace("<="," -le ").Replace(">="," -ge ").Replace("<"," -lt ").Replace(">"," -gt ").Replace("="," -eq ")
+                    }
                     $temp = $temp.Replace("&&"," -and ").Replace("||", " -or ").Replace("!!"," -not ")
                     $temp = Out-String -InputObject (expandvariables -line $temp -quoted).substring($iscond.Index)
                     $script:variables["%satisfied"] = Invoke-Expression -Command $temp
@@ -177,6 +187,12 @@ function pilotsetparams {
 
     if ($paramline -match "\bw(?<width>\d+)\b") {
         $script:printwidth = 0 + $matches['width']
+    }
+    if ($paramline -match "\bCS\b") {
+        $script:casesensitive = $true
+    }
+    if ($paramline -match "\bCI\b") {
+        $script:casesensitive = $false
     }
 }
 
