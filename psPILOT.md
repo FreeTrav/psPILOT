@@ -10,11 +10,11 @@ This implementation has been tested using PowerShell 5 on Windows 7 and PowerShe
 
 ### General notes
 
-psPILOT preserves the case of string literals, but makes all comparisons in a case-insensitive manner - that is, `M:Yes`, `M:YES`, and `m:yes` are all identical instructions to psPILOT, but the user will see different output for `T:This is a test` and `T:THIS IS A TEST`.
+psPILOT preserves the case of string literals, but defaults to making all comparisons in a case-insensitive manner - that is, `M:Yes`, `M:YES`, and `m:yes` are all identical instructions to psPILOT, but the user will see different output for `T:This is a test` and `T:THIS IS A TEST`. Case sensitivity for comparisons can be turned on and off as needed; see the `P` statement below.
 
 In the syntax descriptions below, the following symbols are used:
 
-`«variable-name»`: Variable names consist of a `#` (for integer numeric variables) or `$` (for string variables) followed by up to ten alphanumeric characters (including the underscore), beginning with a letter.
+`«variable-name»`: Variable names consist of a `#` (for integer numeric variables) or `$` (for string variables) followed by up to ten alphanumeric characters (including the underscore), beginning with a letter. If this symbol is written as `«#variable-name»` or `«$variable-name»`, it indicates that the variable must be numeric or string respectively.
 
 `«filename»`: Filenames are system-dependent as to syntax and allowable characters; psPILOT makes no effort to validate the existence of a file or the syntax of its name. Filenames may be stored in string variables, and the variable passed to PILOT statements that expect a `«filename»`.
 
@@ -96,7 +96,7 @@ If you wish to include the characters **$** (indicates string variables), **#** 
 
 `E:`
 
-End (return from) subroutine or (if outside of a subroutine) end the program. In psPILOT, if an operand is supplied, it will be ignored, but does not cause an error. Most implementations of PILOT do not permit an operand to be supplied.
+End (return from) subroutine or (if outside of a subroutine) end the program. In psPILOT, if an operand is supplied, it will be ignored (treated as a remark/comment), but does not cause an error. Most implementations of PILOT do not permit an operand to be supplied.
 
 #### J: Jump
 
@@ -118,9 +118,9 @@ There are a few special jumps that are permitted without using labels; all are s
 
 #### M: Match
 
-`M:«match-value-list»`
+`M:«$match-value-list»`
 
-`«match-value-list»` is a list of string values, separated by `,`, `!`, or `|`.
+`«$match-value-list»` is a list of string values, separated by `,`, `!`, or `|`.
 
 Match the accept buffer against string variables or string literals. Multiple values may be given separated by `,`, `!`, or `|`. 
 
@@ -128,7 +128,7 @@ The match flag is set to 'yes' or 'no', depending on whether a match is made. An
 
 The first match string (if any) that is a substring of the accept buffer is assigned to the special (system) variable `%MATCH`. The buffer characters left of the first match are assigned to `%LEFT`, and the characters on the right are assigned to `%RIGHT`.
 
-Matches are case-insensitive by default. Case-sensitivity for M: and parenthesized conditionals can be turned on; see the **P:** statement.
+Matches are case-insensitive by default. Case-sensitivity for `M:` and parenthesized conditionals can be turned on; see the `P:` statement.
 
 #### R: Remark
 
@@ -138,23 +138,23 @@ Matches are case-insensitive by default. Case-sensitivity for M: and parenthesiz
 
 #### T: Type
 
-`T:«string-value»`
+`T:«$string-value»`
 
-'Type' operand as output to the default output device (usually the screen). Variables are expanded, but `«expression»`s that would be valid in a `C:` statement are not evaluated. If `«string-value»` is omitted, a blank line will be printed.
+'Type' operand as output to the default output device (usually the screen). Variables are expanded, but `«expression»`s that would be valid in a `C:` statement are not evaluated. If `«$string-value»` is omitted, a blank line will be printed.
 
 ##### Y: Yes
 
-`Y: «string-value»`
+`Y: «$string-value»`
 
 Equivalent to TY: (type if last match successful). 
 
 ##### N: No
 
-`N:«string-value»`
+`N:«$string-value»`
 
 Equivalent to TN: (type if last match unsuccessful)
 
-The `H` modifier may be used on `T:`, `Y:`, and `N:` statements (`TH:`, `YH:`, and `NH:`). This causes the text specified in `«string-value»` to be output without a trailing newline. This is an extension mentioned in section 4.3 of the Standard for `T`, but not for `Y` or `N`.
+The `H` modifier may be used on `T:`, `Y:`, and `N:` statements (`TH:`, `YH:`, and `NH:`). This causes the text specified in `«$string-value»` to be output without a trailing newline. This is an extension mentioned in section 4.3 of the Standard for `T`, but not for `Y` or `N`.
 
 #### U: Use
 
@@ -178,7 +178,7 @@ If there is parenthesized expression in a statement, it is a conditional express
 
 `«relational-operator»::="<"|"<="|"="|">="|">"|"<>"`
 
-If the `«value»`s are strings, comparison is done using lexical ordering; the default is case-insensitive, i.e., `"A"="a"` will be true. Case-sensitivity may be turned on for these comparisons and the M: statement; see the **P:** statement.
+If the `«value»`s are strings, comparison is done using lexical ordering; the default is case-insensitive, i.e., `"A"="a"` will be true. Case-sensitivity may be turned on for these comparisons and the `M:` statement; see the `P:` statement.
 
 Example:
 `R:Type message if x>y+z`
@@ -239,9 +239,9 @@ If an attempt to read past the end of the existing data is made, a flag will be 
 
 ##### FW: Write a Line of Text to a File
 
-`FW: «#handlevar», «string-value»`
+`FW: «#handlevar», «$string-value»`
 
-`«#handlevar»` is the "file handle" created when the file was opened with `FA:` or `FB:`. `«string-value»` is the data to be written to the file.
+`«#handlevar»` is the "file handle" created when the file was opened with `FA:` or `FB:`. `«$string-value»` is the data to be written to the file.
 
 #### L: Link
 
@@ -257,9 +257,9 @@ The Standard suggests that this statement be used to define program sections ("p
 
  `P: «text»`
 
-`«text»` is optional, and treated by psPILOT as a comment, except for the following control sequences:
+`«text»` is optional, and treated by psPILOT as a comment, except for the control sequences documented here. All control sequences are assumed to be bounded by anything defined as a word boundary in regular expressions (regexp used is ``"\b«control-sequence»\b"``).
 
-`W«number»` is a 'width control', which sets the width for word-wrapping in `T`, `Y`, and `N` statements. This control sequence should be separated by anything defined in regular expressions as a word boundary (technical note: the regexp used to find this is `\bw\d+\b`). Until the next `W` control sequence is encountered, word wrap in `T`, `N`, and `Y` statements will occur at the specified value - if a `J` or `U` statement causes program execution to bypass a `P` statement with a width control, that width control does not take effect.
+`W«number»` is a 'width control', which sets the width for word-wrapping in `T`, `Y`, and `N` statements. Until the next `W` control sequence is encountered, word wrap in `T`, `N`, and `Y` statements will occur at the specified value - if a `J` or `U` statement causes program execution to bypass a `P` statement with a width control, that width control does not take effect.
 
 The default width for word-wrapping is 75 characters.
 
@@ -271,9 +271,9 @@ The `P` (`Problem`) statement is mentioned in section 4.1 of the Standard. No di
 
 #### W: Wait
 
-`W: «seconds»`
+`W: «#seconds»`
 
-`«seconds»` is a numeric expression evaluating to an integer representing the number of seconds to pause execution.
+`«#seconds»` is a numeric expression evaluating to an integer representing the number of seconds to pause execution.
 
 The `W` (`Wait`) statement is mentioned in section 4.1 of the Standard. 
 
